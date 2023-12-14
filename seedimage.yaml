@@ -1,0 +1,18 @@
+apiVersion: elemental.cattle.io/v1beta1
+kind: SeedImage
+metadata:
+  name: fire-img-raw
+  namespace: fleet-default
+spec:
+  type: raw
+  baseImage: registry.opensuse.org/isv/rancher/elemental/dev/containers/suse/sle-micro/rpi-5.5:2.1.0
+  buildContainer:
+    name: builder
+    image: ghcr.io/frelon/seedimage-rpi-builder:latest
+    commands: ["/bin/bash", "-c"]
+    args: ["mkdir /build && cd /build && /usr/bin/elemental --debug build-disk --unprivileged --expandable --deploy-command elemental-register,--debug,--reset --squash-no-compression --cloud-init-paths=/elemental --cloud-init /overlay/reg/reset-config.yaml,/overlay/iso-config/cloud-config.yaml -n elemental -o /iso $(ELEMENTAL_BASE_IMAGE) && mv /iso/elemental.raw /iso/$(ELEMENTAL_OUTPUT_NAME)"]
+  registrationRef:
+    apiVersion: elemental.cattle.io/v1beta1
+    kind: MachineRegistration
+    name: fire-nodes
+    namespace: fleet-default
